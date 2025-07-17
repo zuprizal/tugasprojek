@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar {
+            background-color: #2c3e50;
+            color: white;
+            width: 250px;
+            height: calc(100vh - 60px);
+            position: fixed;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            padding: 1rem;
+            border-bottom: 1px solid #34495e;
+            cursor: pointer;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .welcome-message {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .create-user-form {
+            margin-top: 2rem;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .success-message {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <div>
+            <span id="usernameDisplay"></span>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <ul>
+            <li onclick="showDashboard()">Dashboard</li>
+            <li onclick="showCreateUser()">Buat User Baru</li>
+            <li onclick="showAbout()">About</li>
+            <li onclick="showProfile()">Profil</li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div id="dashboardContent" class="welcome-message">
+            <h2>Selamat datang, <span id="welcomeName"></span>!</h2>
+            <p>Anda login sebagai Administrator.</p>
+        </div>
+        
+        <div id="createUserContent" class="create-user-form" style="display: none;">
+            <h2>Buat User Baru</h2>
+            <form id="createUserForm">
+                <div class="form-group">
+                    <label for="newUsername">Username</label>
+                    <input type="text" id="newUsername" name="newUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                    <small>Password harus mengandung huruf besar, huruf kecil, angka, dan karakter khusus</small>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Nama Lengkap</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+                <button type="submit">Buat User</button>
+                <div id="createUserMessage" class="error-message"></div>
+            </form>
+        </div>
+        
+        <div id="aboutContent" style="display: none;">
+            <h2>About</h2>
+            <p>Sistem login dengan dashboard admin dan user.</p>
+        </div>
+        
+        <div id="profileContent" style="display: none;">
+            <h2>Profil</h2>
+            <div id="profileInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        // Tampilkan username saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = sessionStorage.getItem('username') || 'Admin';
+            document.getElementById('usernameDisplay').textContent = username;
+            document.getElementById('welcomeName').textContent = username;
+            
+            // Load profile info
+            loadProfileInfo();
+        });
+        
+        function showDashboard() {
+            document.getElementById('dashboardContent').style.display = 'block';
+            document.getElementById('createUserContent').style.display = 'none';
+            document.getElementById('aboutContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'none';
+        }
+        
+        function showCreateUser() {
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('createUserContent').style.display = 'block';
+            document.getElementById('aboutContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'none';
+        }
+        
+        function showAbout() {
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('createUserContent').style.display = 'none';
+            document.getElementById('aboutContent').style.display = 'block';
+            document.getElementById('profileContent').style.display = 'none';
+        }
+        
+        function showProfile() {
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('createUserContent').style.display = 'none';
+            document.getElementById('aboutContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            loadProfileInfo();
+        }
+        
+        function loadProfileInfo() {
+            // Dalam implementasi nyata, ini akan mengambil data dari server
+            const profileInfo = `
+                <p><strong>Username:</strong> ${sessionStorage.getItem('username') || 'Admin'}</p>
+                <p><strong>Role:</strong> Admin</p>
+                <p><strong>Terdaftar sejak:</strong> ${new Date().toLocaleDateString()}</p>
+            `;
+            document.getElementById('profileInfo').innerHTML = profileInfo;
+        }
+        
+        function logout() {
+            // Dalam implementasi nyata, ini akan mengirim permintaan ke server untuk logout
+            sessionStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+        
+        // Handle form pembuatan user
+        // Di bagian form create user
+document.getElementById('createUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const messageElement = document.getElementById('createUserMessage');
+    messageElement.textContent = '';
+    messageElement.className = '';
+
+    fetch('create_user.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageElement.textContent = data.message || 'User berhasil dibuat!';
+            messageElement.className = 'success-message';
+            this.reset();
+        } else {
+            messageElement.textContent = data.message || 'Gagal membuat user';
+            messageElement.className = 'error-message';
+        }
+    })
+    .catch(error => {
+        messageElement.textContent = 'Terjadi kesalahan saat membuat user';
+        messageElement.className = 'error-message';
+        console.error('Error:', error);
+    });
+});
+        
+        function isPasswordComplex(password) {
+            // Minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan karakter khusus
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return regex.test(password);
+        }
+    </script>
+</body>
+</html>
